@@ -69,10 +69,22 @@ public class PlayController : MonoBehaviour
                 AudioManager.instance.PlaySound(AUDIO_TYPE.KICK);
                 StartCoroutine(FallStick());
             }
+        if(GameManager.instance.currentState == GAME_STATE.NONE&& GameManager.instance.currentPlayerState != PLAYER_STATE.DIE)
+        if (Input.GetMouseButtonDown(0))
+        {
+                StartCoroutine(Fighting(0.42f));
+        }
 
     }
-
+        
     
+    IEnumerator Fighting(float t)
+    {
+        GameManager.instance.currentPlayerState = PLAYER_STATE.FIGHT;
+        yield return new WaitForSeconds(t);
+        if(GameManager.instance.currentPlayerState == PLAYER_STATE.FIGHT)
+        GameManager.instance.currentPlayerState = PLAYER_STATE.RUN;
+    }
 
     IEnumerator FallStick()
     {
@@ -82,7 +94,8 @@ public class PlayController : MonoBehaviour
         var x = Rotate(currentStick.transform, rotateTranform, 0.4f);
         AudioManager.instance.PlaySound(AUDIO_TYPE.WOODHIT);
         yield return x;
-        Vector3 root = new Vector3(currentStick.transform.position.x + currentStick.transform.localScale.y, this.transform.position.y, this.transform.position.z);
+        
+            Vector3 root = new Vector3(currentStick.transform.position.x + currentStick.transform.localScale.y, this.transform.position.y, this.transform.position.z);
         currentStick.SetRayAll(root);
 
         if (currentStick.isPerfect)
@@ -98,23 +111,25 @@ public class PlayController : MonoBehaviour
         target.y = this.transform.position.y;
         x = Move(this.transform, target, currentStick.transform.localScale.y / cameraOffsetX* _speedMove);
         GameManager.instance.currentPlayerState = PLAYER_STATE.RUN;
+        
         yield return x;
 
        
         if (!currentStick.isGround)
         {
-            GameManager.instance.currentPlayerState = PLAYER_STATE.IDLE;
-            GameManager.instance.currentPlayerState = PLAYER_STATE.DIE;
+            //GameManager.instance.currentPlayerState = PLAYER_STATE.IDLE;
+            //GameManager.instance.currentPlayerState = PLAYER_STATE.DIE;
 
-            AudioManager.instance.PlaySound(AUDIO_TYPE.DIE);
-            rig.gravityScale = 1f;
+            //AudioManager.instance.PlaySound(AUDIO_TYPE.DIE);
+            StartCoroutine( GameManager.instance.GameOver(1f));
             x = Rotate(currentStick.transform, endRotateTransform, 0.5f);
             yield return x;
             Debug.Log("GameOver");
             //GameOver();
-            GameManager.instance.currentState = GAME_STATE.GAMEOVER;
+            //GameManager.instance.currentState = GAME_STATE.GAMEOVER;
         }
         else
+        if(GameManager.instance.currentPlayerState!= PLAYER_STATE.DIE) 
         {
             GameManager.instance.score++;
             AudioManager.instance.PlaySound(AUDIO_TYPE.SCORE);
@@ -196,6 +211,7 @@ public class PlayController : MonoBehaviour
     {
         GroundPooling.instance.ReturnAllPooling();
         StickPooling.instance.ReturnAllPooling();
+        EnemyPooling.instance.ReturnAllPooling();
 
     }
 
@@ -212,6 +228,20 @@ public class PlayController : MonoBehaviour
         nextGround.transform.position = new Vector3(x, nextGround.transform.position.y);
         nextGround.SetRandomSize(currentGround);
         nextGround.gameObject.SetActive(true);
+        float tmp = nextGround.transform.position.x  - (currentGround.transform.position.x );
+        Debug.Log(tmp);
+        if (tmp>3.5f)
+        {
+
+            EnemyController e = EnemyPooling.instance.GetObjectFromPool();
+            e.BackToDefault();
+            e.RandomPosition(new Vector2(currentGround.transform.position.x + currentGround.GetLocalScaleX() + 1f, nextGround.transform.position.x - nextGround.GetLocalScaleX() - 0.5f));
+
+            e.gameObject.SetActive(true);
+        }
+            
+
+
         Vector3 tempDistance = new Vector3(Random.Range(spawnRange.x, spawnRange.y) + currentGround.GetLocalScaleX() * 0.5f+0.5f, 0, 0);
         startPos += tempDistance;
     }
@@ -220,15 +250,26 @@ public class PlayController : MonoBehaviour
 
     IEnumerator Move(Transform currentTransform, Vector3 target, float time)
     {
-        var passed = 0f;
-        var init = currentTransform.transform.position;
-        while (passed < time)
+        
         {
-            passed += Time.deltaTime;
-            var normalized = passed / time;
-            var current = Vector3.Lerp(init, target, normalized);
-            currentTransform.position = current;
-            yield return null;
+            var passed = 0f;
+            var init = currentTransform.transform.position;
+            while (passed < time)
+            {
+                if (GameManager.instance.currentPlayerState != PLAYER_STATE.DIE)
+                //
+                {
+                    passed += Time.deltaTime;
+                    var normalized = passed / time;
+                    var current = Vector3.Lerp(init, target, normalized);
+                    currentTransform.position = current;
+                }
+                else
+                {
+                    passed = time;
+                }
+                yield return null;
+            }
         }
 
     }

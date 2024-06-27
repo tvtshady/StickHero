@@ -25,6 +25,7 @@ public class ObjectPooling<T> : MonoBehaviour where T: Component
             _instance = this;
         else if (this.GetInstanceID() != instance.GetInstanceID())
             Destroy(this.gameObject);
+        CreatePool();
     }
 
 

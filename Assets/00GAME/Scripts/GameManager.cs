@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static AudioManager;
 
 public class GameManager : MonoBehaviour
 { 
@@ -116,8 +117,10 @@ public class GameManager : MonoBehaviour
         GROW,
         RUN,
         DIE,
-        KICK
+        KICK,
+        FIGHT
     }
+
 
     public void SetHighScore()
     {
@@ -155,6 +158,15 @@ public class GameManager : MonoBehaviour
         controller.CreatePlatform();
     }
     
-
+    public IEnumerator GameOver(float t)
+    {
+        GameManager.instance.currentPlayerState = PLAYER_STATE.IDLE;
+        GameManager.instance.currentPlayerState = PLAYER_STATE.DIE;
+        AudioManager.instance.PlaySound(AUDIO_TYPE.DIE);
+        controller.GetComponent<Collider2D>().isTrigger = true;
+        controller.GetComponent<Rigidbody2D>().gravityScale = 1f;
+        yield return new WaitForSeconds(t);
+        GameManager.instance.currentState = GAME_STATE.GAMEOVER;
+    }
 
 }

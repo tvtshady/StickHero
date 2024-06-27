@@ -7,6 +7,9 @@ TagManager:
   - Platform
   - PerfectTile
   - ReturnPooling
+  - Weapon
+  - Enemy
+  - Play
   layers:
   - Default
   - TransparentFX

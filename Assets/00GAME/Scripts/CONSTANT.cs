@@ -9,4 +9,6 @@ public class CONSTANT
     public static string SaveHighScore = "SaveHighScore";
     public static string highscore = "highscore";
     public static string yourscore = "yourscore";
+    public static string player = "Play";
+    public static string weapon = "Weapon";
 }

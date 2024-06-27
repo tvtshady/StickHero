@@ -35,7 +35,7 @@ public class AudioManager : Singleton<AudioManager>
 
     public enum AUDIO_TYPE
     {
-        GROW,SCORE,PERFECT,WOODHIT,DIE,BUTTON,FALL,KICK
+        GROW,SCORE,PERFECT,WOODHIT,DIE,BUTTON,FALL,KICK,HIT,DIEENEMY
     }
 
 }
